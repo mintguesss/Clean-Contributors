@@ -8,6 +8,10 @@
 # Failure injection:
 #   FAIL_AT=<text>   fail a call whose "METHOD path" contains <text> (once)
 #   FAIL_ALWAYS=1    with FAIL_AT, fail it every time
+#
+# Like GitHub, branches/<name> follows renames: a name recorded in
+# $FAKE_GH_DIR/renamed (or listed in $FAKE_RENAMED) resolves to the default
+# branch even though no such ref exists.
 set -u
 D="${FAKE_GH_DIR:?FAKE_GH_DIR is not set}"
 ST="$D/state"
@@ -40,8 +44,17 @@ case "$M $P" in
   "GET repos/o/r")
     if [[ $JQ == .default_branch ]]; then echo "$def"; else echo true; fi ;;
   "GET repos/o/r/branches/"*)
-    has "${P#repos/o/r/branches/}" || { echo "HTTP 404: Not Found" >&2; exit 1; }
+    b=${P#repos/o/r/branches/}
+    if ! has "$b" && ! { echo "${FAKE_RENAMED:-}"; cat "$D/renamed" 2>/dev/null; } | grep -qx "$b"; then
+      echo "HTTP 404: Not Found" >&2; exit 1
+    fi
     echo false ;;
+  "GET repos/o/r/git/matching-refs/heads/"*)
+    prefix=${P#repos/o/r/git/matching-refs/heads/}
+    echo "$branches" | grep -v '^$' | while read -r b; do
+      [[ $b == "$prefix"* ]] && echo "refs/heads/$b"
+    done
+    exit 0 ;;
   "GET repos/o/r/git/ref/heads/"*) echo 0123abcd ;;
   "GET repos/o/r/pulls"*) echo 0 ;;
   "GET repos/o/r/contributors"*) echo mintguesss ;;
@@ -53,6 +66,7 @@ case "$M $P" in
   "POST repos/o/r/branches/"*/rename)
     b=${P#repos/o/r/branches/}; b=${b%/rename}
     has "$b" || { echo "HTTP 404: Not Found" >&2; exit 1; }
+    echo "$b" >> "$D/renamed"
     branches=$(echo "$branches" | sed "s/^$b\$/${F[new_name]}/")
     [[ $def == "$b" ]] && def=${F[new_name]}
     save ;;

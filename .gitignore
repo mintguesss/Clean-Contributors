@@ -3,3 +3,4 @@
 *.bundle
 strip.git/
 tmp-check.git/
+.claude/settings.local.json

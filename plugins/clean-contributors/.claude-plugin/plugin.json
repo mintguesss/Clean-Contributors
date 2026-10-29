@@ -1,6 +1,6 @@
 {
   "name": "clean-contributors",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Check, strip Co-authored-by trailers from history, and force-refresh the GitHub Contributors cache.",
   "author": {
     "name": "mintguesss"

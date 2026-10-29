@@ -36,10 +36,17 @@ ADMIN=$(gh api "repos/$REPO" --jq .permissions.admin)
 [[ "$ADMIN" == "true" ]] || die "you need admin permission on $REPO"
 OLD="${DEF}-old-refresh"
 
-if gh api "repos/$REPO/branches/$TMP" >/dev/null 2>&1; then
+# branches/<name> follows renames: after one refresh, "$OLD" resolves to the
+# real default branch. Match the exact ref instead.
+branch_exists() {
+  local refs
+  refs=$(gh api "repos/$REPO/git/matching-refs/heads/$1" --jq '.[].ref') || die "cannot list branches of $REPO"
+  grep -qx "refs/heads/$1" <<< "$refs"
+}
+if branch_exists "$TMP"; then
   die "branch '$TMP' already exists on $REPO; delete it first"
 fi
-if gh api "repos/$REPO/branches/$OLD" >/dev/null 2>&1; then
+if branch_exists "$OLD"; then
   die "branch '$OLD' already exists on $REPO; delete or rename it first"
 fi
 SHA=$(gh api "repos/$REPO/git/ref/heads/$DEF" --jq .object.sha)

@@ -18,6 +18,14 @@ You removed the `Co-authored-by: Claude` lines, maybe even rewrote the commits, 
 
 Also included: standalone `refresh.sh` / `refresh.ps1` scripts for people who do not use Claude Code.
 
+### Before / after
+
+Tested on this repository itself: one commit with a `Co-Authored-By: Claude` trailer, then `strip-coauthors` and `refresh-contributors-cache`.
+
+| Before | After |
+| --- | --- |
+| ![Contributors list showing mintguesss and claude](docs/images/before.png) | ![Contributors list showing only mintguesss](docs/images/after.png) |
+
 ## Install (Claude Code)
 
 ```
@@ -118,6 +126,8 @@ MIT
 | `check-contributors` | 找出原因：歷史裡還有署名，還是只是快取沒更新 | 不會，唯讀 |
 | `strip-coauthors` | 改寫歷史，刪掉對應的 `Co-authored-by` 行並 force push | **會改寫歷史**（另外確認） |
 | `refresh-contributors-cache` | 強制 GitHub 重算 Contributors | 會暫時切換預設分支，完成後還原 |
+
+實測前後對比見上方 [Before / after](#before--after)（就是拿這個倉庫自己測的）。
 
 ### 安裝
 

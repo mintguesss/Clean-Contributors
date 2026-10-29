@@ -14,7 +14,7 @@ It needs `gh` logged in as a repository admin on a machine that can write reposi
 1. `gh auth status` succeeds. If `gh` is missing: `winget install --id GitHub.cli` (Windows, then reopen the terminal), `brew install gh` (macOS), or https://cli.github.com; then `gh auth login`.
 2. `gh api repos/$REPO --jq '{default_branch, admin: .permissions.admin}'`: `admin` must be `true`. `$DEF` is the default branch.
 3. `gh api repos/$REPO/branches/$DEF --jq .protected` and `gh api "repos/$REPO/pulls?state=open&per_page=100" --jq length`. Mention protection rules and open PRs in the confirmation; PRs normally follow a branch rename, protection rules may need a manual look.
-4. Neither `tmp-refresh-contributors` nor `$DEF-old-refresh` may exist already (`gh api repos/$REPO/branches/<name>` should 404). If one exists from an earlier failed run, include deleting or restoring it in the plan.
+4. Neither `tmp-refresh-contributors` nor `$DEF-old-refresh` may exist already: `gh api repos/$REPO/git/matching-refs/heads/<name> --jq '.[].ref'` must not print `refs/heads/<name>`. Do not use `gh api repos/$REPO/branches/<name>` for this: it follows renames, so after any earlier refresh `$DEF-old-refresh` resolves to the real default branch and looks like it exists. If one exists from an earlier failed run, include deleting or restoring it in the plan.
 5. If the `check-contributors` skill found Co-authored-by trailers or authorship for the account still in history, say that the account will come back after the refresh and offer `strip-coauthors` first.
 
 ## Confirm once

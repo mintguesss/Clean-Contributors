@@ -51,9 +51,11 @@ $Admin = Invoke-Gh api "repos/$Repo" --jq .permissions.admin
 if ($Admin -ne 'true') { Fail "you need admin permission on $Repo" }
 $Old = "$Def-old-refresh"
 
+# branches/<name> follows renames: after one refresh, $Old resolves to the real
+# default branch. Match the exact ref instead.
 foreach ($b in @($Tmp, $Old)) {
-  & gh api "repos/$Repo/branches/$b" *> $null
-  if ($LASTEXITCODE -eq 0) { Fail "branch '$b' already exists on $Repo; delete it first" }
+  try { $refs = @(Invoke-Gh api "repos/$Repo/git/matching-refs/heads/$b" --jq '.[].ref') } catch { Fail "cannot list branches of $Repo" }
+  if ($refs -contains "refs/heads/$b") { Fail "branch '$b' already exists on $Repo; delete it first" }
 }
 
 $Sha = Invoke-Gh api "repos/$Repo/git/ref/heads/$Def" --jq .object.sha

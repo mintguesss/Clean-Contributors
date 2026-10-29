@@ -22,7 +22,7 @@ fi
 check() {
   local name=$1 runner=$2 initial=$3 want_exit=$4 want_state=$5; shift 5
   printf '%b\n' "$initial" > "$FAKE_GH_DIR/state"
-  rm -f "$FAKE_GH_DIR/log" "$FAKE_GH_DIR/failed"
+  rm -f "$FAKE_GH_DIR/log" "$FAKE_GH_DIR/failed" "$FAKE_GH_DIR/renamed"
   env "$@" $runner > "$FAKE_GH_DIR/out" 2>&1
   local code=$? state; state=$(paste -sd, "$FAKE_GH_DIR/state")
   if [[ $code -eq $want_exit && $state == "$want_state" ]]; then
@@ -42,6 +42,7 @@ for r in "${RUNNERS[@]}"; do
   check "delete temp fails"           "$r" 'main\nmain' 1 main,main,tmp-refresh-contributors FAIL_AT=DELETE FAIL_ALWAYS=1
   check "leftover temp branch"        "$r" 'main\nmain\ntmp-refresh-contributors' 1 main,main,tmp-refresh-contributors
   check "leftover old branch"         "$r" 'main\nmain\nmain-old-refresh' 1 main,main,main-old-refresh
+  check "repo refreshed before"       "$r" 'main\nmain' 0 main,main FAKE_RENAMED=main-old-refresh
 done
 
 echo; echo "$PASS passed, $FAILED failed"
