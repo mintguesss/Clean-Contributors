@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate JSON manifests
         run: |
           for f in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json; do
@@ -28,7 +28,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: filter-repo message callback
         run: python3 tests/test_callback.py
       - name: refresh.sh and refresh.ps1 against a fake gh
