@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON manifests
+        run: |
+          for f in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json; do
+            python3 -m json.tool "$f" > /dev/null && echo "ok $f"
+          done
+      - name: ShellCheck
+        run: shellcheck -S warning plugins/clean-contributors/scripts/refresh.sh
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $r = Invoke-ScriptAnalyzer plugins/clean-contributors/scripts/refresh.ps1 -Severity Error
+          $r | Format-Table -AutoSize
+          if ($r) { exit 1 }
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: filter-repo message callback
+        run: python3 tests/test_callback.py
+      - name: refresh.sh and refresh.ps1 against a fake gh
+        run: bash tests/test-refresh.sh

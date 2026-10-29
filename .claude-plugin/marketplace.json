@@ -1,0 +1,14 @@
+{
+  "name": "clean-contributors",
+  "description": "Remove unwanted accounts (like Claude) from a GitHub repository's Contributors list.",
+  "owner": {
+    "name": "mintguesss"
+  },
+  "plugins": [
+    {
+      "name": "clean-contributors",
+      "source": "./plugins/clean-contributors",
+      "description": "Check, strip Co-authored-by trailers from history, and force-refresh the GitHub Contributors cache."
+    }
+  ]
+}

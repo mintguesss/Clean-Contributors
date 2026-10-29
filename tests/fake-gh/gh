@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Fake gh for tests. Simulates the handful of GitHub REST calls the refresh
+# scripts make against a repository called o/r.
+#
+# State lives in $FAKE_GH_DIR/state: first line is the default branch, the
+# remaining lines are the branches. Every call is appended to $FAKE_GH_DIR/log.
+#
+# Failure injection:
+#   FAIL_AT=<text>   fail a call whose "METHOD path" contains <text> (once)
+#   FAIL_ALWAYS=1    with FAIL_AT, fail it every time
+set -u
+D="${FAKE_GH_DIR:?FAKE_GH_DIR is not set}"
+ST="$D/state"
+echo "gh $*" >> "$D/log"
+[[ "$1" == auth ]] && exit 0
+shift
+
+M=GET; P=""; JQ=""; declare -A F=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -X) M=$2; shift 2 ;;
+    -f) F[${2%%=*}]=${2#*=}; shift 2 ;;
+    --jq) JQ=$2; shift 2 ;;
+    --silent) shift ;;
+    *) P=$1; shift ;;
+  esac
+done
+
+def=$(head -n 1 "$ST"); branches=$(tail -n +2 "$ST")
+save() { { echo "$def"; echo "$branches" | grep -v '^$'; } > "$ST"; }
+has() { echo "$branches" | grep -qx "$1"; }
+
+if [[ -n "${FAIL_AT:-}" && "$M $P" == *"$FAIL_AT"* ]]; then
+  if [[ -n "${FAIL_ALWAYS:-}" || ! -f "$D/failed" ]]; then
+    touch "$D/failed"; echo "HTTP 403: injected failure" >&2; exit 1
+  fi
+fi
+
+case "$M $P" in
+  "GET repos/o/r")
+    if [[ $JQ == .default_branch ]]; then echo "$def"; else echo true; fi ;;
+  "GET repos/o/r/branches/"*)
+    has "${P#repos/o/r/branches/}" || { echo "HTTP 404: Not Found" >&2; exit 1; }
+    echo false ;;
+  "GET repos/o/r/git/ref/heads/"*) echo 0123abcd ;;
+  "GET repos/o/r/pulls"*) echo 0 ;;
+  "GET repos/o/r/contributors"*) echo mintguesss ;;
+  "POST repos/o/r/git/refs")
+    branches="$branches"$'\n'"${F[ref]#refs/heads/}"; save ;;
+  "PATCH repos/o/r")
+    has "${F[default_branch]}" || { echo "HTTP 422: no such branch" >&2; exit 1; }
+    def=${F[default_branch]}; save ;;
+  "POST repos/o/r/branches/"*/rename)
+    b=${P#repos/o/r/branches/}; b=${b%/rename}
+    has "$b" || { echo "HTTP 404: Not Found" >&2; exit 1; }
+    branches=$(echo "$branches" | sed "s/^$b\$/${F[new_name]}/")
+    [[ $def == "$b" ]] && def=${F[new_name]}
+    save ;;
+  "DELETE repos/o/r/git/refs/heads/"*)
+    b=${P#repos/o/r/git/refs/heads/}
+    [[ $def == "$b" ]] && { echo "HTTP 422: cannot delete default branch" >&2; exit 1; }
+    branches=$(echo "$branches" | grep -vx "$b"); save ;;
+  *) echo "fake gh: unhandled $M $P" >&2; exit 1 ;;
+esac
