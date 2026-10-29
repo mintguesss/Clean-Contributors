@@ -45,4 +45,4 @@ GitHub applies renames asynchronously; if a step right after a rename fails with
 3. If the failure is a permission or proxy refusal, do not retry the same change another way. Report exactly what was done and what remains, and give the user the remaining commands (or the script command) to run on their own machine.
 
 ## Finish
-Report: default branch restored, temporary branch deleted, and the output of `gh api "repos/$REPO/contributors?per_page=100" --jq '.[].login'`. Results only, no extra advice.
+Report: default branch restored, temporary branch deleted, and the output of `gh api "repos/$REPO/contributors?per_page=100" --jq '.[].login'`. Results only, no extra advice, with one exception: the refresh updates the sidebar's avatar list, but the number next to "Contributors" is recomputed only on the next push to the default branch. If the account is gone from the list but the count is still too high, say so and that the next ordinary push to the default branch corrects it.

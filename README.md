@@ -88,7 +88,9 @@ GitHub recalculates contributors when the default branch changes. The script mak
 4. make the real branch the default again
 5. delete `tmp-refresh-contributors`
 
-Commits, tags and open PRs are untouched (PRs follow branch renames). The web page can take a few minutes to catch up after the API does.
+Commits, tags and open PRs are untouched (PRs follow branch renames).
+
+The refresh updates the avatar list in the sidebar right away. The number next to **Contributors** is cached separately and is only recomputed on the next push to the default branch, so if the account is gone but the count is one too high, your next ordinary push fixes it. (Seen while testing on this repository: the list was clean after the refresh, the count dropped from 2 to 1 with the next push.)
 
 ## Things to know
 
@@ -128,6 +130,8 @@ MIT
 | `refresh-contributors-cache` | 強制 GitHub 重算 Contributors | 會暫時切換預設分支，完成後還原 |
 
 實測前後對比見上方 [Before / after](#before--after)（就是拿這個倉庫自己測的）。
+
+刷新後側欄的頭像列表會立刻更新，但「Contributors」旁邊的數字是另外快取的，要等下一次 push 到預設分支才會重算；如果帳號已經不見、數字卻多 1，下一次正常 push 就會修正。
 
 ### 安裝
 
