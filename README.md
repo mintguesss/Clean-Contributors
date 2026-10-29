@@ -1,6 +1,6 @@
-# clean-contributors
+# Clean-Contributors
 
-[![CI](https://github.com/mintguesss/clean-contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/mintguesss/clean-contributors/actions/workflows/ci.yml)
+[![CI](https://github.com/mintguesss/Clean-Contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/mintguesss/Clean-Contributors/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757)](#install-claude-code)
 
@@ -29,7 +29,7 @@ Tested on this repository itself: one commit with a `Co-Authored-By: Claude` tra
 ## Install (Claude Code)
 
 ```
-/plugin marketplace add mintguesss/clean-contributors
+/plugin marketplace add mintguesss/Clean-Contributors
 /plugin install clean-contributors@clean-contributors
 ```
 
@@ -136,7 +136,7 @@ MIT
 ### 安裝
 
 ```
-/plugin marketplace add mintguesss/clean-contributors
+/plugin marketplace add mintguesss/Clean-Contributors
 /plugin install clean-contributors@clean-contributors
 ```
 

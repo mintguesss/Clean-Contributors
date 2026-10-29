@@ -5,8 +5,8 @@
   "author": {
     "name": "mintguesss"
   },
-  "homepage": "https://github.com/mintguesss/clean-contributors",
-  "repository": "https://github.com/mintguesss/clean-contributors",
+  "homepage": "https://github.com/mintguesss/Clean-Contributors",
+  "repository": "https://github.com/mintguesss/Clean-Contributors",
   "license": "MIT",
   "keywords": ["github", "contributors", "co-authored-by", "git", "claude", "claude-code", "plugin"]
 }
